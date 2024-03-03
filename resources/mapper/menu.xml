@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 
+window - preferences - Maven - "Download Artifact Javadoc" check 
+ -->
+<mapper namespace="com.care.coffee.menu.MenuMapper">
+	<resultMap type="com.care.coffee.menu.MenuDTO" id="Menu">
+		<id column="id" property="id"/>
+		<result column="cate" property="cate"/>
+		<result column="cate_detail" property="cateDetail"/>
+		<result column="name_kr" property="nameKr"/>
+		<result column="name_en" property="nameEn"/>
+		<result column="content" property="content"/>
+		<result column="drink_size" property="drinkSize"/>
+		<result column="kcal" property="kcal"/>
+		<result column="sodium" property="sodium"/>
+		<result column="cholesterol" property="cholesterol"/>
+		<result column="suger" property="suger"/>
+		<result column="protein" property="protein"/>
+		<result column="allergy" property="allergy"/>
+		<result column="price" property="price"/>
+		<result column="picture" property="picture"/>
+	</resultMap>
+	
+	<resultMap type="com.care.coffee.menu.ProductCateDetailDTO" id="CateDetail">
+		<id column="no" property="no"/>
+		<result column="cate_id" property="cateId"/>
+		<result column="name2" property="name2"/>
+	</resultMap>
+
+	<resultMap type="com.care.coffee.menu.CartDTO" id="cart">
+		<result column="user_id" property="userId"/>
+		<result column="count" property="count"/>
+		<result column="prod_num" property="prodNum"/>
+		<result column="cate_detail" property="cateDetail"/>
+		<result column="name_kr" property="nameKr"/>
+	</resultMap>
+	
+	<!-- 메뉴 목록 -->
+	<!-- id,cate,name_kr,name_en,content,drink_size,kcal,sodium,cholesterol,suger,protein,allergy,price,picture -->
+	<select id="menuList" resultMap="Menu">
+		select A.*,B.picture1
+		from product A 
+		LEFT OUTER JOIN product_picture B 
+		ON A.id=B.num
+	</select>
+	
+	<!-- 메뉴 상세보기 -->
+	<select id="menuContent" resultMap="Menu">
+		select A.*,B.name1,C.*,D.name2, E.* 
+		from product_detail D, product_cate B, product_size E, product A 
+		LEFT OUTER JOIN product_picture C 
+		ON A.id=C.num 
+		where B.no=A.cate AND A.id=#{id} AND A.cate_detail=D.cate_id AND A.drink_size=E.id
+	</select>
+	
+	<insert id="cartInsert">
+		insert into cart values(#{sessionId},#{count},#{prodNum})
+	</insert>
+	
+	<select id="cartCheck">
+		select nvl(user_id, '0') 
+		FROM cart 
+		WHERE user_id=#{sessionId} AND prod_num=#{prodNum}
+	</select>
+	
+	<!-- 장바구니 목록 -->
+	<select id="cartList" resultMap="cart">
+		select F.*,A.*,B.name1,C.*,D.name2,E.*
+		from product_detail D, product_cate B,cart F, product_size E, product A 
+		LEFT OUTER JOIN product_picture C 
+		ON A.id=C.num 
+		where B.no=A.cate AND A.cate_detail=D.cate_id 
+		    AND A.drink_size=E.id AND F.prod_num=A.id AND user_id=#{userId}
+	</select>
+	
+	<!-- 장바구니 비우기 -->
+	<delete id="cartClear">
+		delete from cart where user_id=#{userId}
+	</delete>
+	
+	<!-- 장바구니 수량 변경 -->
+	<update id="modifyCount">
+		update cart set count=#{count} where user_id=#{userId} and prod_num=#{prodNum}
+	</update>
+	
+	<!-- 장바구니 상품 삭제 -->
+	<delete id="deleteCart">
+		delete from cart where user_id=#{userId} and prod_num=#{prodNum}
+	</delete>
+	
+	<!-- 장바구니 선택 구매 -->
+	<insert id="insertBuyDetails">
+		insert into into duy_detail(buy_detail_code, item_code, buy_cnt, buy_code)
+	<foreach collection="buyDetailList" item="buyDetailDTO" separator="UNION ALL" index="i">
+		SELECT #{buyDetail.buyDetailCode}||'_'||LPAD(#{i}+1,2,0)
+			, #{buyDetailDTO.itemCode}
+			, #{buyDetailDTO.buyCnt}
+			, #{buyDetailDTO.buyCode}
+		FROM DUAL
+	</foreach>
+	</insert>
+	
+	
+	
+	<!-- 장바구니 선택 삭제 -->
+	
+	
+	
+	
+	
+</mapper>
+
+

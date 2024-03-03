@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.care.coffee.shop_admin.IAdminShopMapper">
+	<insert id="shop_cate_add_proc">
+		<selectKey order="BEFORE" keyProperty="num" resultType="int">
+			SELECT NVL(max(num),0) + 1 FROM shop_cate
+		</selectKey>
+		INSERT INTO shop_cate VALUES(#{num}, #{type})
+	</insert>
+	
+	<select id="shop_cate_list">
+		SELECT * FROM shop_cate
+	</select>
+	
+	<delete id="shop_cate_delete_proc">
+		DELETE FROM shop_cate WHERE num=#{num}
+	</delete>
+	
+	<insert id="shop_add_proc">
+		<selectKey order="BEFORE" keyProperty="no" resultType="int">
+			SELECT NVL(max(no),0) + 1 FROM shop
+		</selectKey>
+		INSERT INTO shop VALUES(#{no}, #{cate}, #{name}, #{tel}, #{location}, #{worktime}, #{lat}, #{lng})
+	</insert>
+	
+	<select id="shop_list" >
+		SELECT A.*, B.type FROM shop A, shop_cate B WHERE A.cate = B.num
+	</select>
+	
+	<select id="shop_info_get">
+		SELECT * FROM shop WHERE no=#{no}
+	</select>
+	
+	<update id="shop_update_proc">
+		UPDATE shop SET name=#{name}, tel=#{tel}, location=#{location}, worktime=#{worktime}, lat=#{lat}, lng=#{lng} WHERE no=#{no}
+	</update>
+	
+	<delete id="shop_delete_proc">
+		DELETE FROM shop WHERE no=#{no}
+	</delete>
+	
+</mapper>

@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 
+window - preferences - Maven - "Download Artifact Javadoc" check 
+ -->
+<mapper namespace="com.care.coffee.admin.menu.AdminMenuMapper">
+	<resultMap type="com.care.coffee.admin.menu.AdminMenuDTO" id="adminMenu">
+		<id column="id" property="id"/>
+		<result column="cate" property="cate"/>
+		<result column="cate_detail" property="cateDetail"/>
+		<result column="name_kr" property="nameKr"/>
+		<result column="name_en" property="nameEn"/>
+		<result column="content" property="content"/>
+		<result column="drink_size" property="drinkSize"/>
+		<result column="kcal" property="kcal"/>
+		<result column="cholesterol" property="cholesterol"/>
+		<result column="protein" property="protein"/>
+		<result column="sodium" property="sodium"/>
+		<result column="suger" property="suger"/>
+		<result column="caffeine" property="caffeine"/>
+		<result column="allergy" property="allergy"/>
+		<result column="price" property="price"/>
+		<result column="picture" property="picture"/>
+	</resultMap>
+	
+	<resultMap type="com.care.coffee.admin.menu.AdminProductCateDetailDTO" id="adminCateDetail">
+		<id column="no" property="no"/>
+		<result column="cate_id" property="cateId"/>
+		<result column="name2" property="name2"/>
+	</resultMap>
+	
+	<!-- 메뉴 목록 -->
+	<!-- id,cate,name_kr,name_en,content,drink_size,kcal,sodium,cholesterol,suger,protein,allergy,price,picture -->
+	<select id="menuList" resultMap="adminMenu">
+		select A.*,B.picture1
+		from product A 
+		LEFT OUTER JOIN product_picture B 
+		ON A.id=B.num
+	</select>
+	
+	<!-- 메뉴 상세보기 -->
+	<select id="menuContent" resultMap="adminMenu">
+		select A.*,B.name1,C.picture1,D.name2, E.* 
+		from product_detail D, product_cate B, product_size E, product A 
+		LEFT OUTER JOIN product_picture C 
+		ON A.id=C.num 
+		where B.no=A.cate AND A.id=#{id} AND A.cate_detail=D.cate_id AND A.drink_size=E.id
+	</select>
+	
+	<select id="cateList">
+		select * from product_cate
+	</select>
+	
+	<!-- 메뉴추가 -->
+	<insert id="menuInsert">
+		<!-- insert into product(id,cate,name_kr,name_en,content,drink_size,kcal,sodium,cholesterol,suger,protein,allergy,price)
+		values(product_seq.nextval,#{cate},#{nameKr},#{nameEn},#{content},#{drinkSize},#{kcal},#{sodium},#{cholesterol},#{suger},#{protein},#{allergy},#{price}) -->
+		
+		INSERT ALL
+	    	INTO product(id,cate,cate_detail,name_kr,name_en,content,drink_size,kcal,cholesterol,protein,sodium,suger,caffeine,allergy,price)
+	    	VALUES (product_seq.nextval,#{cate},#{cateDetail},#{nameKr},#{nameEn},#{content},#{drinkSize},#{kcal},#{cholesterol},#{protein},#{sodium},#{suger},#{caffeine},#{allergy},#{price})
+	    	
+	    	INTO product_picture (num, picture1)
+	   	 	VALUES (product_seq.nextval, #{picture1})
+		SELECT * FROM DUAL
+	</insert>
+	
+	<!-- 2차 카테고리 추가 -->
+	<insert id="cateInsert" parameterType="com.care.coffee.admin.menu.AdminProductCateDetailDTO">
+		insert into product_detail values(product_detail_seq.nextval,#{cateId},#{name2})
+	</insert>
+	
+	<!-- 2차 카테고리 리스트 -->
+	<select id="detailList" resultMap="adminCateDetail">
+		select * from product_detail
+	</select>
+	
+	<!-- 2차 카테고리 리스트(1차값 넘김) -->
+	<select id="subcateList" resultMap="adminCateDetail">
+		select * from product_detail where num = #{num} order by cate_id
+	</select>
+	
+	<!-- 메뉴 사이즈 리스트 -->
+	<select id="sizeList">
+		select * from product_size
+	</select>
+	
+	<!-- 수정 페이지 리스트 -->
+	<select id="modifyList" resultMap="adminMenu">
+		select A.*,B.name1,C.*,D.name2, E.* 
+		from product_detail D, product_cate B, product_size E, product A 
+		LEFT OUTER JOIN product_picture C 
+		ON A.id=C.num 
+		where B.no=A.cate AND A.id=#{id} AND A.cate_detail=D.cate_id AND A.drink_size=E.id
+	</select>
+	
+	<!-- <update id="modify" parameterType="com.care.coffee.admin.menu.AdminMenuDTO">
+	    product 테이블 업데이트
+	    UPDATE product
+	    SET cate = #{cate},cate_detail = #{cateDetail},name_kr = #{nameKr},name_en = #{nameEn},content = #{content},
+	        drink_size = #{drinkSize},kcal = #{kcal},sodium = #{sodium},cholesterol = #{cholesterol},suger = #{suger},
+	        protein = #{protein},allergy = #{allergy},price = #{price}
+	    WHERE id = #{id}
+	    
+	    product_picture 테이블 업데이트
+	    UPDATE product_picture
+	    SET picture1 = #{picture1}
+	    WHERE num = #{id}
+	</update> -->
+	
+	<update id="modify1">
+	    UPDATE product 
+	    SET cate = #{cate},cate_detail = #{cateDetail},name_kr = #{nameKr},name_en = #{nameEn},content = #{content}, 
+	        drink_size = #{drinkSize},kcal = #{kcal},cholesterol = #{cholesterol},protein = #{protein},
+	        sodium = #{sodium},suger = #{suger},caffeine = #{caffeine},allergy = #{allergy},price = #{price} 
+	    WHERE id = #{id}
+	</update>
+	
+	<update id="modify2">
+	    UPDATE product_picture 
+	    SET picture1 = #{picture1} 
+	    WHERE num = #{id}
+	</update>
+	
+	<delete id="delete1">
+        DELETE FROM product WHERE id = #{no}
+	</delete>
+        
+	<delete id="delete2">
+        DELETE FROM product_picture WHERE num = #{no}
+	</delete>
+
+	
+</mapper>
+

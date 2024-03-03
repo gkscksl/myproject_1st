@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 
+window - preferences - Maven - "Download Artifact Javadoc" check 
+ -->
+
+
+<mapper namespace="com.care.coffee.member.Admin_MemberMapper">
+	<resultMap type="com.care.coffee.member.MemberDTO" id="admin_member">
+		<result column="user_id" property="userId"/>
+		<result column="register_day" property="registerDay"/>
+		<result column="detail_address" property="detailAddress"/>
+	</resultMap>
+
+	<select id="login" resultMap="admin_member">
+		SELECT B.name gradeName, A.* FROM member A, grade B WHERE user_id=#{userId} AND A.grade=B.no
+	</select>
+	
+	<select id="admin_memberInfo" resultMap="admin_member">
+	<choose>
+		<when test="select == 'userId'">
+			SELECT AAA.*
+			FROM (SELECT ROWNUM as r, user_id, name, birthday, phone, email, postcode,
+            address, detail_address, nickname, grade, coupon, register_day, status FROM member
+            WHERE user_id like '%' || #{search} || '%')AAA
+            WHERE AAA.r BETWEEN #{begin} AND #{end}
+		</when>
+		<when test="select == 'phone'">
+			SELECT AAA.* 
+			FROM (SELECT ROWNUM as r, user_id, name, birthday, phone, email, postcode,
+			address, detail_address, nickname, grade, coupon, register_day, status FROM member
+			WHERE phone like '%' || #{search} || '%')AAA
+			WHERE AAA.r BETWEEN #{begin} AND #{end}
+		</when>
+		<otherwise>
+			SELECT AAA.*, B.name gradeName
+			FROM (SELECT ROWNUM as r, user_id, name, birthday, phone, email, postcode,
+			address, detail_address, nickname, grade, coupon, register_day, status FROM member)AAA,
+			grade B
+			WHERE AAA.r BETWEEN #{begin} AND #{end} and AAA.grade=B.no
+		</otherwise>
+	</choose>
+	</select>
+	
+	<select id="getMember">
+		SELECT count(*) FROM member WHERE user_id=#{userId}
+	</select>
+	
+	
+	<select id="totalCount" >
+		<choose>
+         <when test="select == 'userId'">
+            SELECT count(user_id) FROM member WHERE user_id like '%' || #{search} || '%'
+         </when>
+         <when test="select == 'phone'">
+            SELECT count(phone) FROM member WHERE phone like '%' || #{search} || '%'
+         </when>
+         <otherwise>
+            SELECT count(user_id) FROM member
+         </otherwise>
+      </choose>
+   </select>
+   
+	<!-- 등급 리스트 -->
+	<select id="gradeList">
+		select * from grade
+	</select>
+   
+	<update id="admin_modifyProc" >
+		UPDATE member
+		SET password=#{password}, name=#{name}, birthday=#{birthday}, email=#{email}, phone=#{phone}, postcode=#{postcode}, address=#{address}, detail_address=#{detailAddress},  nickname=#{nickName},
+		register_day=#{registerDay}, grade=#{grade}
+		WHERE user_id=#{userId} 
+	</update>
+	
+	
+	<delete id="admin_deleteProc" parameterType="java.lang.String">
+    	DELETE FROM member.A, grade.B WHERE user_id = #{userId} AND A.grade=B.no
+	</delete>
+</mapper>
+
+
+
+
+
+
+
+

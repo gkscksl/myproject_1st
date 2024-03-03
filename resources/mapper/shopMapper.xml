@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.care.coffee.shop.IShopMapper">
+	<select id="shop_info">
+		<choose> 
+			<when test="select == 'normal'">
+				SELECT A.*, B.type FROM shop A, shop_cate B WHERE A.cate = B.num AND B.type like '%'||'일반'||'%'
+			</when>
+			<when test="select == 'reserve'">
+				SELECT A.*, B.type FROM shop A, shop_cate B WHERE A.cate = B.num AND B.type like '%'||'리저브'||'%'
+			</when>
+			<when test="select == 'drive'">
+				SELECT A.*, B.type FROM shop A, shop_cate B WHERE A.cate = B.num AND B.type like '%'||'드라이브'||'%'
+			</when>
+			<when test="select == 'store'">
+				SELECT A.*, B.type FROM shop A, shop_cate B WHERE A.cate = B.num AND B.type like '%'||'스토어'||'%'
+			</when>
+			<otherwise>
+				SELECT A.*, B.type FROM shop A, shop_cate B WHERE A.cate = B.num
+			</otherwise>
+		</choose>
+		
+	</select>
+</mapper>
